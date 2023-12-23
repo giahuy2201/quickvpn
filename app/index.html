@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <title>quickvpn</title>
+  </head>
+  <body>
+    <h1>QuickVPN</h1>
+    <h3>Running instances ({{ linode_list | length }})</h3>
+    <ul>
+      {% for item in linode_list %}
+      <li><a href="/{{ item.label }}">{{ item.label }}</a></li>
+      {% endfor %}
+    </ul>
+    <h3>New instance</h3>
+    <form action="/" method="post">
+      <label for="region">Region:</label>
+      <select name="region" id="region">
+        {% for item in region_list %}
+        <option value="{{ item }}">{{ item }}</option>
+        {% endfor %}
+      </select>
+      <br />
+      <label for="expiration">Expiration:</label>
+      <select name="expiration" id="expiration">
+        {% for item in expiration_list %}
+        <option value="{{ item }}">{{ item }}</option>
+        {% endfor %}
+      </select>
+      <br /><br />
+      <input type="submit" value="Submit" />
+    </form>
+  </body>
+</html>
