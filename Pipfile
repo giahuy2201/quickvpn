@@ -12,6 +12,7 @@ python-multipart = "*"
 python-dotenv = "*"
 paramiko = "*"
 cloudflare-ddns = "*"
+cloudflare = "*"
 
 [dev-packages]
 

@@ -10,6 +10,7 @@ from linode_api4 import LinodeClient, Instance
 from dotenv import load_dotenv
 import os
 import paramiko
+import CloudFlare
 
 app = FastAPI()
 paramiko.util.log_to_file("paramiko.log")
@@ -17,6 +18,10 @@ load_dotenv()
 LINODE_TOKEN = os.getenv("LINODE_TOKEN")
 SSH_KEY = os.getenv("SSH_KEY")
 SSH_PASSWD = os.getenv("SSH_PASSWD")
+CF_EMAIL = os.getenv("CF_EMAIL")
+CF_TOKEN = os.getenv("CF_TOKEN")
+CF_DOMAIN = os.getenv("CF_DOMAIN")
+CF_ZONEID = os.getenv("CF_ZONEID")
 # Create a single Linode API client
 linode_client = LinodeClient(LINODE_TOKEN)
 
@@ -79,7 +84,7 @@ async def delete_instance(instance_id: str):
             instance_id=instance_id, instance_ipv4=instance.ipv4[0]
         )
     )
-    instance.delete()
+    instance_dict.pop(instance_id).delete()
     return RedirectResponse("/")
 
 
@@ -109,6 +114,36 @@ async def setup_wireguard(instance_id: str):
     print(
         "{instance_id} ({instance_ipv4}) set".format(
             instance_id=instance_id, instance_ipv4=instance_ipv4
+        )
+    )
+    return RedirectResponse("/")
+
+
+@app.get("/{instance_id}/dns")
+async def setup_wireguard(instance_id: str):
+    instance_ipv4 = instance_dict[instance_id].ipv4[0]
+    cf = CloudFlare.CloudFlare(token=CF_TOKEN)
+    try:
+        params = {"name": CF_DOMAIN, "match": "all", "type": "A"}
+        dns_records = cf.zones.dns_records.get(CF_ZONEID, params=params)
+        new_record = {
+            "name": CF_DOMAIN,
+            "type": "A",
+            "content": instance_ipv4,
+            "proxied": False,
+        }
+        if len(dns_records) == 0:
+            dns_record = cf.zones.dns_records.post(CF_ZONEID, data=new_record)
+        else:
+            record = dns_records[0]
+            dns_record = cf.zones.dns_records.put(
+                CF_ZONEID, record["id"], data=new_record
+            )
+    except CloudFlare.exceptions.CloudFlareAPIError as e:
+        print("%s - %d %s - api call failed" % (CF_DOMAIN, e, e))
+    print(
+        "{instance_id} ({instance_ipv4}) {instance_dns} updated".format(
+            instance_id=instance_id, instance_ipv4=instance_ipv4, instance_dns=CF_DOMAIN
         )
     )
     return RedirectResponse("/")
