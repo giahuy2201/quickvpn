@@ -9,10 +9,14 @@ import starlette.status as status
 from linode_api4 import LinodeClient, Instance
 from dotenv import load_dotenv
 import os
+import paramiko
 
 app = FastAPI()
+paramiko.util.log_to_file("paramiko.log")
 load_dotenv()
 LINODE_TOKEN = os.getenv("LINODE_TOKEN")
+SSH_KEY = os.getenv("SSH_KEY")
+SSH_PASSWD = os.getenv("SSH_PASSWD")
 # Create a single Linode API client
 linode_client = LinodeClient(LINODE_TOKEN)
 
@@ -37,7 +41,7 @@ def get_status(request: Request):
         "index.html",
         {
             "request": request,
-            "region_list": region_list,
+            "region_list": linode_client.regions(),
             "expiration_list": expiration_list,
             "linode_list": linode_list,
         },
@@ -49,14 +53,19 @@ async def create_instance(
     region: Annotated[str, Form()], expiration: Annotated[str, Form()]
 ):
     # Create a new Linode
-    new_linode, root_pass = linode_client.linode.instance_create(
+    new_linode = linode_client.linode.instance_create(
         ltype="g6-nanode-1",
         region=region,
         image="linode/debian12",
         label="wg0-" + region,
+        authorized_keys=[SSH_KEY],
+        root_pass=SSH_PASSWD,
     )
-
-    print(new_linode.label, " created")
+    print(
+        "{instance_id} ({instance_ipv4}) created".format(
+            instance_id=new_linode.label, instance_ipv4=new_linode.ipv4[0]
+        )
+    )
     return RedirectResponse(
         "/", status_code=status.HTTP_302_FOUND
     )  # without status_code original method is carried over but undesirable in this case
@@ -64,6 +73,42 @@ async def create_instance(
 
 @app.get("/{instance_id}")
 async def delete_instance(instance_id: str):
-    instance_dict[instance_id].delete()
-    print(instance_id, " deleted")
+    instance = instance_dict[instance_id]
+    print(
+        "{instance_id} ({instance_ipv4}) deleted".format(
+            instance_id=instance_id, instance_ipv4=instance.ipv4[0]
+        )
+    )
+    instance.delete()
+    return RedirectResponse("/")
+
+
+@app.get("/{instance_id}/up")
+async def setup_wireguard(instance_id: str):
+    instance_ipv4 = instance_dict[instance_id].ipv4[0]
+    # install wireguard
+    sshClient = paramiko.SSHClient()
+    sshClient.set_missing_host_key_policy(paramiko.WarningPolicy())
+    sshClient.connect(instance_ipv4, username="root", password=SSH_PASSWD)
+    stdin, stdout, stderr = sshClient.exec_command(
+        "apt update && apt install -y wireguard iptables"
+    )
+    exit_status = stdout.channel.recv_exit_status()
+    stdin, stdout, stderr = sshClient.exec_command("sysctl -w net.ipv4.ip_forward=1")
+    exit_status = stdout.channel.recv_exit_status()
+    # add wireguard config
+    sftpClient = sshClient.open_sftp()
+    filepath = "/etc/wireguard/wg0.conf"
+    localpath = "app/wg/wg0.conf"
+    sftpClient.put(localpath, filepath)
+    # up wireguard
+    stdin, stdout, stderr = sshClient.exec_command("wg-quick up wg0")
+    exit_status = stdout.channel.recv_exit_status()
+    sftpClient.close()
+    sshClient.close()
+    print(
+        "{instance_id} ({instance_ipv4}) set".format(
+            instance_id=instance_id, instance_ipv4=instance_ipv4
+        )
+    )
     return RedirectResponse("/")

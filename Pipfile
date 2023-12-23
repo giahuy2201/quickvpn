@@ -10,6 +10,8 @@ jinja2 = "*"
 linode-api4 = "*"
 python-multipart = "*"
 python-dotenv = "*"
+paramiko = "*"
+cloudflare-ddns = "*"
 
 [dev-packages]
 
