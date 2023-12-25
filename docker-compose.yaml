@@ -1,0 +1,11 @@
+version: '3.5'
+
+services:
+  quickvpn:
+    image: quickvpn:latest
+    container_name: quickvpn
+    restart: unless-stopped
+    volumes:
+      - ./config:/quickvpn/config
+    ports:
+      - 8000:80

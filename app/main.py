@@ -12,9 +12,16 @@ import os
 import paramiko
 import CloudFlare
 
+production = True
+
+if production:
+    pass
+else:
+    paramiko.util.log_to_file("paramiko.log")
+
 app = FastAPI()
-paramiko.util.log_to_file("paramiko.log")
-load_dotenv()
+
+load_dotenv('config/.env')
 LINODE_TOKEN = os.getenv("LINODE_TOKEN")
 SSH_PASSWD = os.getenv("SSH_PASSWD")
 CF_TOKEN = os.getenv("CF_TOKEN")
@@ -25,7 +32,6 @@ linode_client = LinodeClient(LINODE_TOKEN)
 
 templates = Jinja2Templates(directory="app")
 
-region_list = ["jp-osa", "ap-south", "eu-central", "us-east"]
 expiration_list = ["1 hour", "2 hours", "3 hours", "6 hours", "12 hours", "never"]
 
 # references for created instances
@@ -106,7 +112,7 @@ async def setup_wireguard(instance_id: str):
     # add wireguard config
     sftpClient = sshClient.open_sftp()
     filepath = "/etc/wireguard/wg0.conf"
-    localpath = "app/wg0.conf"
+    localpath = "config/wg0.conf"
     sftpClient.put(localpath, filepath)
     # up wireguard
     stdin, stdout, stderr = sshClient.exec_command("wg-quick up wg0")
