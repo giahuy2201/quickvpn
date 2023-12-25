@@ -16,9 +16,7 @@ app = FastAPI()
 paramiko.util.log_to_file("paramiko.log")
 load_dotenv()
 LINODE_TOKEN = os.getenv("LINODE_TOKEN")
-SSH_KEY = os.getenv("SSH_KEY")
 SSH_PASSWD = os.getenv("SSH_PASSWD")
-CF_EMAIL = os.getenv("CF_EMAIL")
 CF_TOKEN = os.getenv("CF_TOKEN")
 CF_DOMAIN = os.getenv("CF_DOMAIN")
 CF_ZONEID = os.getenv("CF_ZONEID")
@@ -68,7 +66,6 @@ async def create_instance(
         region=region,
         image="linode/debian12",
         label="wg0-" + region,
-        authorized_keys=[SSH_KEY],
         root_pass=SSH_PASSWD,
     )
     print(
@@ -109,7 +106,7 @@ async def setup_wireguard(instance_id: str):
     # add wireguard config
     sftpClient = sshClient.open_sftp()
     filepath = "/etc/wireguard/wg0.conf"
-    localpath = "app/wg/wg0.conf"
+    localpath = "app/wg0.conf"
     sftpClient.put(localpath, filepath)
     # up wireguard
     stdin, stdout, stderr = sshClient.exec_command("wg-quick up wg0")
