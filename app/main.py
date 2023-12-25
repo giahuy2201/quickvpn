@@ -1,7 +1,7 @@
 from typing import Union, Annotated
 
 from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import starlette.status as status
@@ -51,6 +51,11 @@ def get_status(request: Request):
             "linode_list": linode_list,
         },
     )
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse("app/favicon.ico")
 
 
 @app.post("/")
