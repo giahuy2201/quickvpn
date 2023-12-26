@@ -1,8 +1,8 @@
+---
 version: '3.5'
-
 services:
   quickvpn:
-    image: quickvpn:latest
+    image: giahuy2201/quickvpn:latest
     container_name: quickvpn
     restart: unless-stopped
     volumes:

@@ -8,9 +8,14 @@
     <ul>
       {% for item in linode_list %}
       <li>
-        <a href="/{{ item.label }}">{{ item.label }}</a> -
-        <a href="/{{ item.label }}/up">wg-quick</a>
+        {{ item.label }} - {% if item.status == "running" %}
+        <a href="/{{ item.label }}/up">wireguard</a>
         <a href="/{{ item.label }}/dns">dns</a>
+        <a href="/{{ item.label }}/kill">kill</a>
+        {% else %} {{ item.status }} {% endif %} 
+        {% if
+        expiration_dict[item.label] != 0 %}- {{
+        get_time_remaining(expiration_dict[item.label]) }} {% endif %}
       </li>
       {% endfor %}
     </ul>
@@ -23,12 +28,15 @@
         {% endfor %}
       </select>
       <br />
-      <label for="expiration">Expiration:</label>
-      <select name="expiration" id="expiration">
-        {% for item in expiration_list %}
-        <option value="{{ item }}">{{ item }}</option>
-        {% endfor %}
-      </select>
+      <label for="expiration">Expiration (hrs, 0 means never):</label>
+      <input
+        type="number"
+        id="expiration"
+        name="expiration"
+        min="0"
+        max="12"
+        value="1"
+      />
       <br /><br />
       <input type="submit" value="Submit" />
     </form>
