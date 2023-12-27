@@ -94,7 +94,8 @@ def create_instance(region: Annotated[str, Form()], expiration: Annotated[int, F
         expiration_dict[instance_label] = datetime.datetime.now() + datetime.timedelta(
             hours=expiration
         )
-        timer = threading.Timer(expiration * 60, delete_instance, [instance_label])
+        # Terminate instance 1 min less than set time to account for delay
+        timer = threading.Timer(expiration * 3540, delete_instance, [instance_label])
         timer.start()
         print(
             "{instance_label} ({instance_ipv4}) timer set for {expiration} hours".format(
