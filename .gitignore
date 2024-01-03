@@ -1,3 +1,6 @@
 *.env
+*.log
 *.lock
 *.DS_Store
+/config/wg*.conf
+!/config/sample.env
