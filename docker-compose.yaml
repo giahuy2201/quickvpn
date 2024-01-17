@@ -9,3 +9,9 @@ services:
       - ./config:/quickvpn/config
     ports:
       - 8000:80
+    environment:
+      - LINODE_TOKEN=
+      - SSH_PASSWD=
+      - CF_TOKEN=
+      - CF_DOMAIN=
+      - CF_ZONEID=

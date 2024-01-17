@@ -7,7 +7,6 @@ from fastapi.templating import Jinja2Templates
 import starlette.status as status
 
 from linode_api4 import LinodeClient, Instance
-from dotenv import load_dotenv
 import os
 import paramiko
 import CloudFlare
@@ -23,7 +22,6 @@ else:
 
 app = FastAPI()
 
-load_dotenv("config/.env")
 LINODE_TOKEN = os.getenv("LINODE_TOKEN")
 SSH_PASSWD = os.getenv("SSH_PASSWD")
 CF_TOKEN = os.getenv("CF_TOKEN")
