@@ -4,3 +4,5 @@
 *.DS_Store
 /config/wg*.conf
 !/config/sample.env
+.vscode
+__pycache__

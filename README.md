@@ -1,11 +1,11 @@
 # quickvpn
 
-A quick 'n dirty way to deploy your on-demand vpn server on Linode.
+A quick 'n dirty way to deploy your on-demand vpn servers on Linode.
 ## Development
 ```
-pipenv install
+poetry install
 export PYTHONPATH=$PWD/app
-pipenv run uvicorn main:app --reload
+poetry run uvicorn main:app --reload
 ```
 ## Usage
 | Environment variables | Function |
