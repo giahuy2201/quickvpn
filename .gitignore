@@ -6,3 +6,4 @@
 !/config/sample.env
 .vscode
 __pycache__
+requirements.txt

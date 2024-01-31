@@ -2,11 +2,18 @@
 
 A quick 'n dirty way to deploy your on-demand vpn servers on Linode.
 ## Development
-```
-poetry install
+```bash
+poetry install --no-root
 export PYTHONPATH=$PWD/app
 poetry run uvicorn main:app --reload
 ```
+
+## Build
+```bash
+poetry export --without-hashes --format requirements.txt > requirements.txt
+docker build -t giahuy2201/quickvpn .
+```
+
 ## Usage
 | Environment variables | Function |
 | :----: | --- |

@@ -1,5 +1,5 @@
 ---
-version: '3.5'
+version: '3.6'
 services:
   quickvpn:
     image: giahuy2201/quickvpn:latest
