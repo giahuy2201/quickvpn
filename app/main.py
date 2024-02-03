@@ -72,7 +72,7 @@ def favicon():
     return FileResponse("app/favicon.ico")
 
 
-@app.post("/")
+@app.post("/api/instances")
 def create_instance(region: Annotated[str, Form()], expiration: Annotated[int, Form()]):
     global wg_counter
     while "wg" + str(wg_counter) + "-" + region in instance_dict:
@@ -114,7 +114,7 @@ def create_instance(region: Annotated[str, Form()], expiration: Annotated[int, F
     )  # without status_code original method is carried over but undesirable in this case
 
 
-@app.get("/{instance_label}/kill")
+@app.delete("/api/instances/{instance_label}/kill")
 def delete_instance(instance_label: str):
     instance = instance_dict[instance_label]
     print(
@@ -126,7 +126,7 @@ def delete_instance(instance_label: str):
     return RedirectResponse("/")
 
 
-@app.get("/{instance_label}/up")
+@app.update("/api/instances/{instance_label}/up")
 def setup_wireguard(instance_label: str):
     instance_ipv4 = instance_dict[instance_label].ipv4[0]
     # install wireguard
@@ -157,7 +157,7 @@ def setup_wireguard(instance_label: str):
     return RedirectResponse("/")
 
 
-@app.get("/{instance_label}/dns")
+@app.update("/api/instances/{instance_label}/dns")
 def setup_dns(instance_label: str):
     instance_ipv4 = instance_dict[instance_label].ipv4[0]
     cf = CloudFlare.CloudFlare(token=CF_TOKEN)
