@@ -15,6 +15,9 @@ def generate_label(region: str):
         wg_counter += 1
     return "wg" + str(wg_counter) + "-" + region
 
+def get_instance(instance_label: str):
+    return instance_dict[instance_label]
+
 
 def create_instance(region: str, expiration: int):
     instance_label = generate_label(region)
@@ -28,7 +31,7 @@ def create_instance(region: str, expiration: int):
     )
     if new_linode:
         instance_dict[instance_label] = new_linode
-        instance_ipv4 = instance_ipv4 = new_linode.ipv4[0]
+        instance_ipv4 = new_linode.ipv4[0]
         print(f"{instance_label} ({instance_ipv4}) created")
         # Start timer
         if expiration != 0:
@@ -50,7 +53,7 @@ def create_instance(region: str, expiration: int):
 
 def delete_instance(instance_label: str):
     instance = instance_dict[instance_label]
-    instance_ipv4 = instance_ipv4 = instance.ipv4[0]
+    instance_ipv4 = instance.ipv4[0]
     success = instance_dict.pop(instance_label).delete()
     if success:
         print(f"{instance_label} ({instance_ipv4}) deleted")
