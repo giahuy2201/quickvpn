@@ -1,12 +1,13 @@
-from linode_api4 import LinodeClient, Instance
+import linode_api4
 import datetime
 import threading
 
 from app.core.config import config
+import app.schemas.instance as schemas
 
 
 def get_client():
-    return LinodeClient(config.LINODE_TOKEN)
+    return linode_api4.LinodeClient(config.LINODE_TOKEN)
 
 
 def generate_label(region: str):
@@ -15,8 +16,34 @@ def generate_label(region: str):
         wg_counter += 1
     return "wg" + str(wg_counter) + "-" + region
 
+
+def parse_linodes(linodes: linode_api4.PaginatedList):
+    instance_list: [schemas.Instance] = []
+    for node in linodes:
+        print(type(node.type))
+        instance_list.append(
+            schemas.Instance(
+                label=node.label,
+                region=str(node.region),
+                status=str(node.status),
+                image="image",
+                type=str(node.type),
+                expiration="expiration",
+                ipv4=node.ipv4[0],
+                ipv6=node.ipv6[0],
+            )
+        )
+    return instance_list
+
+
 def get_instance(instance_label: str):
     return instance_dict[instance_label]
+
+
+def get_all_instances():
+    # List all Linodes on the account
+    linodes = client.linode.instances()
+    return parse_linodes(linodes)
 
 
 def create_instance(region: str, expiration: int):
@@ -61,7 +88,7 @@ def delete_instance(instance_label: str):
 
 
 # references for created instances
-instance_dict: {str: Instance} = {}
+instance_dict: {str: linode_api4.Instance} = {}
 # store set duration for each instance
 expiration_dict: {str: datetime} = {}
 

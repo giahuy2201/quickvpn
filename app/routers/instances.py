@@ -11,9 +11,7 @@ router = APIRouter()
 
 @router.get("/", tags=["instances"])
 def get_instances(request: Request):
-    # List all Linodes on the account
-    linode_list = linode.client.linode.instances()
-    return linode_list
+    return linode.get_all_instances()
 
 
 @router.post("/", tags=["instances"])
