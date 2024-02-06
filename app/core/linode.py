@@ -24,6 +24,7 @@ def parse_linodes(linodes: linode_api4.PaginatedList):
         instance_list.append(
             Instance(
                 label=node.label,
+                country=node.region.country,
                 region=node.region.label,
                 status=node.status,
                 image=node.image.label,

@@ -14,6 +14,7 @@ class InstanceCreate(InstanceBase):
 
 
 class Instance(InstanceCreate):
+    country: str
     label: str
     status: str
     expiration: str
