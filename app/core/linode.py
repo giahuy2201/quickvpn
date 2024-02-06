@@ -3,7 +3,8 @@ import datetime
 import threading
 
 from app.core.config import config
-import app.schemas.instance as schemas
+from app.schemas.instance import Instance
+from app.schemas.region import Region
 
 
 def get_client():
@@ -18,22 +19,34 @@ def generate_label(region: str):
 
 
 def parse_linodes(linodes: linode_api4.PaginatedList):
-    instance_list: [schemas.Instance] = []
+    instance_list: [Instance] = []
     for node in linodes:
-        print(type(node.type))
         instance_list.append(
-            schemas.Instance(
+            Instance(
                 label=node.label,
-                region=str(node.region),
-                status=str(node.status),
-                image="image",
-                type=str(node.type),
+                region=node.region.label,
+                status=node.status,
+                image=node.image.label,
+                type=node.type.label,
                 expiration="expiration",
                 ipv4=node.ipv4[0],
-                ipv6=node.ipv6[0],
+                ipv6=node.ipv6,
             )
         )
     return instance_list
+
+
+def parse_regions(regions: linode_api4.PaginatedList):
+    region_list: [Region] = []
+    for region in regions:
+        region_list.append(
+            Region(
+                id=region.id,
+                label=region.label,
+                country=region.country,
+            )
+        )
+    return region_list
 
 
 def get_instance(instance_label: str):
@@ -44,6 +57,10 @@ def get_all_instances():
     # List all Linodes on the account
     linodes = client.linode.instances()
     return parse_linodes(linodes)
+
+
+def get_all_regions():
+    return parse_regions(client.regions())
 
 
 def create_instance(region: str, expiration: int):

@@ -18,4 +18,4 @@ class Instance(InstanceCreate):
     status: str
     expiration: str
     ipv4: str
-    ipv4: str
+    ipv6: str
